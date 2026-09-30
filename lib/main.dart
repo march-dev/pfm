@@ -1,21 +1,15 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const FlutterProjectTemplateApp());
-}
+import 'pfm.dart';
 
-class FlutterProjectTemplateApp extends StatelessWidget {
-  const FlutterProjectTemplateApp({super.key});
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  installGlobalErrorHandlers();
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Project Template',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: Container(),
-    );
-  }
+  final dependencies = await DependencyResolver.create();
+
+  // The stores that need an AppLocalizations aren't built here — there's no
+  // BuildContext yet. See _RootScaffoldState.build() (app.dart), the first
+  // point one exists.
+  runApp(App(dependencies: dependencies));
 }

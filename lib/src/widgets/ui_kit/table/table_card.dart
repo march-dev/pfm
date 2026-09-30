@@ -1,0 +1,117 @@
+import 'package:flutter/material.dart';
+
+import '../../../theme/app_sizes.dart';
+import '../cards/app_card.dart';
+import '../dividers/hairline_divider.dart';
+
+/// The rounded, bordered card shell shared by storage.screen.dart's project
+/// table and explorer.screen.dart's project list: an optional header row
+/// above a scrollable body, with an always-visible themed scrollbar.
+///
+/// The caller owns the header content and the body's own list/columns (they
+/// differ per screen); this only provides the shared chrome, the
+/// [ScrollController] lifecycle, and the scrollbar styling so both screens
+/// don't duplicate them.
+class TableCard extends StatefulWidget {
+  const TableCard({super.key, this.header, required this.bodyBuilder});
+
+  /// The row shown above the body, e.g. sortable column labels. Omit for a
+  /// body-only card.
+  final Widget? header;
+
+  /// Builds the scrollable body. The given [ScrollController] must be
+  /// attached to whatever [Scrollable] this builds (a `ListView`, typically)
+  /// so the wrapping scrollbar can track it — including for an empty state,
+  /// since a scrollbar with `thumbVisibility: true` asserts that its
+  /// controller has an attached [ScrollPosition].
+  final Widget Function(BuildContext context, ScrollController controller)
+      bodyBuilder;
+
+  @override
+  State<TableCard> createState() => _TableCardState();
+}
+
+class _TableCardState extends State<TableCard> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      margin: const EdgeInsets.fromLTRB(
+        AppSizes.spacing16,
+        0,
+        AppSizes.spacing16,
+        AppSizes.spacing16,
+      ),
+      padding: EdgeInsets.zero,
+      borderRadius: AppSizes.radiusLarge,
+      clipBehavior: Clip.antiAlias,
+      // A local Material ancestor, clipped to the same rounded rect as the
+      // card itself: InkWell splashes (e.g. a sortable column header) paint
+      // onto the nearest ancestor Material, which without this would be
+      // Scaffold's own full-screen Material — unclipped by AppCard's own
+      // clipBehavior, since that only clips its Container's own child
+      // subtree, not a separate ink layer owned by an ancestor render object.
+      child: Material(
+        type: MaterialType.transparency,
+        clipBehavior: Clip.antiAlias,
+        borderRadius: BorderRadius.circular(AppSizes.radiusLarge),
+        child: Column(
+          children: [
+            if (widget.header != null) ...[
+              widget.header!,
+              const HairlineDivider(),
+            ],
+            _ThemedScrollbar(
+              controller: _scrollController,
+              child: widget.bodyBuilder(context, _scrollController),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// The scrollable body's own Expanded sizing plus its always-visible themed
+// scrollbar, factored out purely to keep _TableCardState.build within this
+// file's own widget-nesting budget.
+class _ThemedScrollbar extends StatelessWidget {
+  const _ThemedScrollbar({required this.controller, required this.child});
+
+  final ScrollController controller;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Expanded(
+      child: ScrollbarTheme(
+        data: ScrollbarThemeData(
+          trackVisibility: const WidgetStatePropertyAll(true),
+          trackColor: WidgetStatePropertyAll(
+            colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+          ),
+          trackBorderColor: WidgetStatePropertyAll(colorScheme.outlineVariant),
+          thumbColor: WidgetStatePropertyAll(
+            colorScheme.onSurface.withValues(alpha: 0.3),
+          ),
+          radius: const Radius.circular(6),
+          thickness: const WidgetStatePropertyAll(8),
+        ),
+        child: Scrollbar(
+          controller: controller,
+          thumbVisibility: true,
+          child: child,
+        ),
+      ),
+    );
+  }
+}

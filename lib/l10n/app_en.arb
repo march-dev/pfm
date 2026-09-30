@@ -1,0 +1,186 @@
+{
+  "@@locale": "en",
+  "appTitle": "PFM",
+  "navOverview": "Overview",
+  "navTransactions": "Transactions",
+  "navCategories": "Categories",
+  "categoryCafeResto": "Cafes & restaurants",
+  "categoryGroceries": "Groceries",
+  "categoryHealth": "Health",
+  "categoryBeauty": "Beauty",
+  "categoryTransport": "Transport",
+  "categoryUtilities": "Utility bills",
+  "categoryTaxes": "Taxes",
+  "categoryGifts": "Gifts",
+  "categoryCash": "Cash",
+  "categoryIncome": "Income",
+  "categoryOther": "Other",
+  "overviewTitle": "Overview",
+  "statIncome": "Income",
+  "statExpenses": "Expenses",
+  "statNet": "Net",
+  "statCashOut": "Cash out",
+  "statCashIn": "Cash in",
+  "overviewEmptyTitle": "No transactions yet",
+  "overviewEmptyMessage": "Import an account activity export (.xlsx) from Santander to see your monthly income and spending.",
+  "spendingByCategory": "Spending by category",
+  "nothingSpentTitle": "Nothing spent this month",
+  "nothingSpentMessage": "No expenses were recorded in this month.",
+  "cashNote": "Cash: {out} taken out, {inn} put in — moves of money, not counted as spending.",
+  "@cashNote": {
+    "placeholders": {
+      "out": {
+        "type": "String"
+      },
+      "inn": {
+        "type": "String"
+      }
+    }
+  },
+  "columnMonth": "Month",
+  "historyEmpty": "No months yet.",
+  "importStatement": "Import statement",
+  "importSuccess": "Imported {count, plural, =1{1 new transaction} other{{count} new transactions}}.",
+  "@importSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importSuccessWithDuplicates": "Imported {added, plural, =1{1 new transaction} other{{added} new transactions}}; {duplicates} already imported.",
+  "@importSuccessWithDuplicates": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "duplicates": {
+        "type": "int"
+      }
+    }
+  },
+  "importNothingNew": "Nothing new — all {count, plural, =1{1 transaction was} other{{count} transactions were}} already imported.",
+  "@importNothingNew": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "transactionsTitle": "Transactions",
+  "cashOperation": "Cash operation",
+  "searchHint": "Search description or merchant",
+  "scopeThisMonth": "This month",
+  "scopeAllTime": "All time",
+  "allCategories": "All categories",
+  "transactionsSummary": "{count, plural, =1{1 transaction} other{{count} transactions}} · {total}",
+  "@transactionsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "columnDate": "Date",
+  "columnDescription": "Description",
+  "columnCategory": "Category",
+  "columnAmount": "Amount",
+  "transactionsEmpty": "No transactions match.",
+  "transactionsEmptyNoData": "Nothing here yet — import a statement to get started.",
+  "deleteTransactionTooltip": "Delete cash operation",
+  "deleteTransactionTitle": "Delete cash operation?",
+  "deleteTransactionMessage": "\"{description}\" will be removed.",
+  "@deleteTransactionMessage": {
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "delete": "Delete",
+  "pinnedHint": "Set by hand for this transaction",
+  "assignDialogTitle": "Assign category",
+  "assignCategoryLabel": "Category",
+  "assignApplyToLabel": "Apply to",
+  "assignApply": "Apply",
+  "assignReset": "Reset to automatic",
+  "newCategory": "New category",
+  "scopeSingle": "Just this transaction",
+  "scopeExactName": "All transactions from \"{name}\"",
+  "@scopeExactName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scopePattern": "All transactions matching a pattern",
+  "matchCount": "{count, plural, =0{No matches} =1{1 transaction} other{{count} transactions}}",
+  "@matchCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "patternHint": "e.g. consum, order*restaurant, /^recibo/",
+  "patternInvalid": "Not a valid pattern.",
+  "patternSyntaxHelp": "Plain text matches anywhere in the description, ignoring case and accents. Use * for any text and ? for one character, or wrap a regular expression in /slashes/.",
+  "create": "Create",
+  "categoryNameHint": "Category name",
+  "cashDialogTitle": "Cash operation",
+  "cashInsert": "Insert cash",
+  "cashWithdraw": "Withdraw cash",
+  "amountLabel": "Amount",
+  "amountInvalid": "Enter an amount greater than zero.",
+  "dateLabel": "Date",
+  "noteLabel": "Note (optional)",
+  "noteHint": "What was it for?",
+  "save": "Save",
+  "cashDialogHint": "Cash operations are filed under Cash and are not counted as income or spending. To record something you paid for in cash, withdraw that amount, then re-file it under what it was spent on.",
+  "cashInsertedDescription": "Cash inserted",
+  "cashWithdrawnDescription": "Cash withdrawn",
+  "categoriesTitle": "Categories & rules",
+  "rulesExplainer": "Transactions are filed by the most specific match: a category you set for one transaction, then an exact-name rule, then a pattern rule (newest first), then the built-in keywords. Create rules by tapping a transaction and choosing what to apply it to.",
+  "notCounted": "Not counted",
+  "incomeBadge": "Income",
+  "cashCategoryHint": "Cash movements are transfers, so they are kept out of income and expenses.",
+  "deleteCategoryTooltip": "Delete category",
+  "deleteCategoryTitle": "Delete category?",
+  "deleteCategoryMessage": "\"{name}\" and the rules and assignments that use it will be removed; its transactions go back to automatic categorization.",
+  "@deleteCategoryMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "columnRuleType": "Type",
+  "columnRuleMatch": "Matches",
+  "columnMatches": "Found",
+  "ruleExactName": "Exact name",
+  "rulePattern": "Pattern",
+  "rulesEmpty": "No rules yet. Tap a transaction and apply its category to a merchant or a pattern to create one.",
+  "deleteRuleTooltip": "Delete rule",
+  "errorUnexpected": "Something went wrong.",
+  "errorLoadData": "Couldn't load your saved data.",
+  "errorImportFormat": "That file doesn't look like a Santander account activity export.",
+  "errorImportStatement": "Couldn't import that file.",
+  "errorAddCash": "Couldn't save the cash operation.",
+  "errorDeleteTransaction": "Couldn't delete the transaction.",
+  "errorAssignCategory": "Couldn't save the category.",
+  "errorInvalidPattern": "That pattern isn't valid.",
+  "errorSaveRule": "Couldn't update the rules.",
+  "errorSaveCategory": "Couldn't save the category.",
+  "errorCategoryExists": "A category named \"{name}\" already exists.",
+  "@errorCategoryExists": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
+}
