@@ -54,15 +54,18 @@ void main() {
 
     test('strips card, city and reference noise', () {
       expect(
-        m.merchantOf('PAGO MOVIL EN CONSUM V. F.CAT, VALENCIA ES, TARJ. :*247394'),
+        m.merchantOf(
+            'PAGO MOVIL EN CONSUM V. F.CAT, VALENCIA ES, TARJ. :*247394'),
         'CONSUM V. F.CAT',
       );
       expect(
-        m.merchantOf('COMPRA Order from restaurant, Valencia, TARJETA 5489 , COMISION 0,00'),
+        m.merchantOf(
+            'COMPRA Order from restaurant, Valencia, TARJETA 5489 , COMISION 0,00'),
         'Order from restaurant',
       );
       expect(
-        m.merchantOf('COMPRA INTERNET EN CONFECCIONES PA, ALMASSERA ES, TARJ. :*247394'),
+        m.merchantOf(
+            'COMPRA INTERNET EN CONFECCIONES PA, ALMASSERA ES, TARJ. :*247394'),
         'CONFECCIONES PA',
       );
       expect(
@@ -70,22 +73,27 @@ void main() {
         'DIGI SPAIN TELECOM SA',
       );
       expect(
-        m.merchantOf('RECIBO SUPERFRIENDS INTERNATIONAL SCHOOL Nº RECIBO 0049 5446'),
+        m.merchantOf(
+            'RECIBO SUPERFRIENDS INTERNATIONAL SCHOOL Nº RECIBO 0049 5446'),
         'SUPERFRIENDS INTERNATIONAL SCHOOL',
       );
       expect(
-        m.merchantOf('TRANSFERENCIA INMEDIATA A FAVOR DE Elena S CONCEPTO Marchenko'),
+        m.merchantOf(
+            'TRANSFERENCIA INMEDIATA A FAVOR DE Elena S CONCEPTO Marchenko'),
         'Elena S',
       );
       expect(
-        m.merchantOf('TRANSFERENCIA DE BRAVE BRAINS S.L., CONCEPTO ABONO NOMINA 08/2026.'),
+        m.merchantOf(
+            'TRANSFERENCIA DE BRAVE BRAINS S.L., CONCEPTO ABONO NOMINA 08/2026.'),
         'BRAVE BRAINS S.L.',
       );
       expect(
-        m.merchantOf('COMPRA BIZUM Agencia Estatal de Administracion Tributaria 18/09/2026'),
+        m.merchantOf(
+            'COMPRA BIZUM Agencia Estatal de Administracion Tributaria 18/09/2026'),
         'Agencia Estatal de Administracion Tributaria',
       );
-      expect(m.merchantOf('BIZUM A FAVOR DE ANNA BEST CONCEPTO: x'), 'ANNA BEST');
+      expect(
+          m.merchantOf('BIZUM A FAVOR DE ANNA BEST CONCEPTO: x'), 'ANNA BEST');
     });
 
     test('falls back to the text before the first comma', () {
@@ -133,14 +141,23 @@ void main() {
         c.categorize(tx(d, cents: cents));
 
     test('recognises the categories from the brief', () {
-      expect(of('PAGO MOVIL EN STARBUCKS RUZAF, VALENCIA ES'), BuiltInCategories.cafeResto);
-      expect(of('PAGO MOVIL EN CONSUM V. F.CAT, VALENCIA ES'), BuiltInCategories.groceries);
-      expect(of('PAGO MOVIL EN FARMACIA ANDRES, VALENCIA ES'), BuiltInCategories.health);
-      expect(of('PAGO MOVIL EN PELUQUERIA LOLA, VALENCIA ES'), BuiltInCategories.beauty);
-      expect(of('COMPRA RENFE, MADRID, TARJETA 1'), BuiltInCategories.transport);
-      expect(of('RECIBO DIGI SPAIN TELECOM SA, concepto: FACTURA DIGI'), BuiltInCategories.utilities);
-      expect(of('COMPRA BIZUM Agencia Estatal de Administracion Tributaria 18/09/2026'), BuiltInCategories.taxes);
-      expect(of('PAGO MOVIL EN FLORISTERIA ROSA, VALENCIA ES'), BuiltInCategories.gifts);
+      expect(of('PAGO MOVIL EN STARBUCKS RUZAF, VALENCIA ES'),
+          BuiltInCategories.cafeResto);
+      expect(of('PAGO MOVIL EN CONSUM V. F.CAT, VALENCIA ES'),
+          BuiltInCategories.groceries);
+      expect(of('PAGO MOVIL EN FARMACIA ANDRES, VALENCIA ES'),
+          BuiltInCategories.health);
+      expect(of('PAGO MOVIL EN PELUQUERIA LOLA, VALENCIA ES'),
+          BuiltInCategories.beauty);
+      expect(
+          of('COMPRA RENFE, MADRID, TARJETA 1'), BuiltInCategories.transport);
+      expect(of('RECIBO DIGI SPAIN TELECOM SA, concepto: FACTURA DIGI'),
+          BuiltInCategories.utilities);
+      expect(
+          of('COMPRA BIZUM Agencia Estatal de Administracion Tributaria 18/09/2026'),
+          BuiltInCategories.taxes);
+      expect(of('PAGO MOVIL EN FLORISTERIA ROSA, VALENCIA ES'),
+          BuiltInCategories.gifts);
     });
 
     test('health and beauty are told apart', () {
@@ -172,7 +189,8 @@ void main() {
     });
 
     test('unmatched money in is income, unmatched money out is other', () {
-      expect(of('TRANSFERENCIA DE ACME SL, CONCEPTO NOMINA', cents: 300000), BuiltInCategories.income);
+      expect(of('TRANSFERENCIA DE ACME SL, CONCEPTO NOMINA', cents: 300000),
+          BuiltInCategories.income);
       expect(of('SOMETHING UNKNOWN'), BuiltInCategories.other);
     });
   });
@@ -180,10 +198,12 @@ void main() {
   group('user rules and priority', () {
     test('an exact-name rule matches that merchant across raw variants', () {
       final c = categorizer(rules: [
-        rule(RuleKind.exactName, 'Rain Forest Val', BuiltInCategories.groceries),
+        rule(
+            RuleKind.exactName, 'Rain Forest Val', BuiltInCategories.groceries),
       ]);
       expect(
-        c.categorize(tx('PAGO MOVIL EN RAIN FOREST VAL, VALENCIA ES, TARJ. :*1')),
+        c.categorize(
+            tx('PAGO MOVIL EN RAIN FOREST VAL, VALENCIA ES, TARJ. :*1')),
         BuiltInCategories.groceries,
       );
       expect(
@@ -207,10 +227,12 @@ void main() {
       final c = categorizer(rules: [
         rule(RuleKind.pattern, 'starbucks', BuiltInCategories.gifts),
       ]);
-      expect(c.categorize(tx('PAGO MOVIL EN STARBUCKS')), BuiltInCategories.gifts);
+      expect(
+          c.categorize(tx('PAGO MOVIL EN STARBUCKS')), BuiltInCategories.gifts);
     });
 
-    test('priority: single assignment > exact name > pattern (newest first)', () {
+    test('priority: single assignment > exact name > pattern (newest first)',
+        () {
       final t = tx('PAGO MOVIL EN SHOP X, VALENCIA ES', id: 'a');
       final rules = [
         rule(RuleKind.pattern, 'shop', BuiltInCategories.taxes, minute: 1),
@@ -223,12 +245,14 @@ void main() {
         ...rules,
         rule(RuleKind.exactName, 'shop x', BuiltInCategories.health, minute: 0),
       ];
-      expect(categorizer(rules: withExact).categorize(t), BuiltInCategories.health,
+      expect(
+          categorizer(rules: withExact).categorize(t), BuiltInCategories.health,
           reason: 'exact name is more specific than any pattern');
 
       expect(
-        categorizer(rules: withExact, assignments: {'a': BuiltInCategories.beauty})
-            .categorize(t),
+        categorizer(
+            rules: withExact,
+            assignments: {'a': BuiltInCategories.beauty}).categorize(t),
         BuiltInCategories.beauty,
         reason: 'a one-off assignment beats every rule',
       );
@@ -237,7 +261,10 @@ void main() {
     test('custom categories work, and vanish gracefully when deleted', () {
       final rules = [rule(RuleKind.pattern, 'rent', 'custom_1')];
       final t = tx('TRANSFERENCIA A FAVOR DE X CONCEPTO rent');
-      expect(categorizer(rules: rules, extraCategories: {'custom_1'}).categorize(t), 'custom_1');
+      expect(
+          categorizer(rules: rules, extraCategories: {'custom_1'})
+              .categorize(t),
+          'custom_1');
       expect(categorizer(rules: rules).categorize(t), BuiltInCategories.other);
       expect(
         categorizer(assignments: {'t': 'custom_1'}).categorize(t),
@@ -249,7 +276,8 @@ void main() {
       final t = tx('Cash withdrawn', source: TransactionSource.manualCash);
       expect(categorizer().categorize(t), BuiltInCategories.cash);
       expect(
-        categorizer(assignments: {'t': BuiltInCategories.cafeResto}).categorize(t),
+        categorizer(assignments: {'t': BuiltInCategories.cafeResto})
+            .categorize(t),
         BuiltInCategories.cafeResto,
         reason: 'a cash purchase can be re-filed under what it was spent on',
       );
@@ -322,13 +350,15 @@ void main() {
       expect(stats.cashOutCents, 20000);
       // Independent check: income - expenses - cash out == sum of amounts.
       final total = txs.fold<int>(0, (s, t) => s + t.amountCents);
-      expect(stats.incomeCents - stats.expenseCents - stats.cashOutCents, total);
+      expect(
+          stats.incomeCents - stats.expenseCents - stats.cashOutCents, total);
 
       expect(categoryOf[txs.first.id], BuiltInCategories.utilities);
       final atm = txs.singleWhere((t) => t.description.startsWith('RETIRADA'));
       expect(categoryOf[atm.id], BuiltInCategories.cash);
       final consum = txs.where((t) => t.description.contains('CONSUM'));
-      expect(consum.map((t) => categoryOf[t.id]).toSet(), {BuiltInCategories.groceries});
+      expect(consum.map((t) => categoryOf[t.id]).toSet(),
+          {BuiltInCategories.groceries});
     });
   });
 }

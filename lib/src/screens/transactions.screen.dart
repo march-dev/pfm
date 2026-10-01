@@ -40,16 +40,6 @@ class _TransactionsHeader extends StatelessObserverWidget {
     return HeaderCard(
       title: l10n.transactionsTitle,
       actions: [
-        if (!state.allMonths) ...[
-          MonthSelector(
-            month: period.month,
-            months: finance.months,
-            onSelected: period.select,
-            onPrevious: period.canGoPrevious ? period.previous : null,
-            onNext: period.canGoNext ? period.next : null,
-          ),
-          const SizedBox(width: AppSizes.spacing12),
-        ],
         PrimaryButton(
           onPressed: () => showCashOperationDialog(context, finance: finance),
           icon: const Icon(Icons.payments_outlined, size: AppSizes.iconMedium),
@@ -60,28 +50,46 @@ class _TransactionsHeader extends StatelessObserverWidget {
         const SizedBox(width: AppSizes.spacing8),
         ImportStatementButton(finance: finance),
       ],
-      // A Wrap (not a Row) so the filters reflow onto a second line in a
-      // narrow window instead of overflowing.
-      child: Wrap(
-        spacing: AppSizes.spacing12,
-        runSpacing: AppSizes.spacing8,
-        crossAxisAlignment: WrapCrossAlignment.center,
+      child: Row(
         children: [
-          SearchField(
-            value: state.search,
-            onChanged: state.setSearch,
-            hintText: l10n.searchHint,
-            width: 260,
+          // A Wrap (not a Row) so the filters reflow onto a second line in
+          // a narrow window instead of overflowing.
+          Expanded(
+            child: Wrap(
+              spacing: AppSizes.spacing12,
+              runSpacing: AppSizes.spacing8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                SearchField(
+                  value: state.search,
+                  onChanged: state.setSearch,
+                  hintText: l10n.searchHint,
+                  width: 260,
+                ),
+                AppSegmentedButton<bool>(
+                  selected: state.allMonths,
+                  onChanged: state.setAllMonths,
+                  segments: [
+                    ButtonSegment(
+                      value: false,
+                      label: Text(l10n.scopeThisMonth),
+                    ),
+                    ButtonSegment(value: true, label: Text(l10n.scopeAllTime)),
+                  ],
+                ),
+                // Only meaningful while looking at a single month.
+                if (!state.allMonths)
+                  MonthSelector(
+                    month: period.month,
+                    months: finance.months,
+                    onSelected: period.select,
+                    onPrevious: period.canGoPrevious ? period.previous : null,
+                    onNext: period.canGoNext ? period.next : null,
+                  ),
+              ],
+            ),
           ),
-          _CategoryFilter(state: state, finance: finance),
-          AppSegmentedButton<bool>(
-            selected: state.allMonths,
-            onChanged: state.setAllMonths,
-            segments: [
-              ButtonSegment(value: false, label: Text(l10n.scopeThisMonth)),
-              ButtonSegment(value: true, label: Text(l10n.scopeAllTime)),
-            ],
-          ),
+          const SizedBox(width: AppSizes.spacing12),
           Text(
             l10n.transactionsSummary(
               visible.length,
@@ -97,36 +105,9 @@ class _TransactionsHeader extends StatelessObserverWidget {
   }
 }
 
-class _CategoryFilter extends StatelessObserverWidget {
-  const _CategoryFilter({required this.state, required this.finance});
-
-  final TransactionsState state;
-  final FinanceState finance;
-
-  // AppDropdown is typed on a non-null value, so "all categories" needs a
-  // stand-in for null.
-  static const _all = '';
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return AppDropdown<String>(
-      minWidth: 180,
-      selected: state.categoryFilter ?? _all,
-      onChanged: (id) => state.setCategoryFilter(id == _all ? null : id),
-      items: [
-        AppDropdownItem(value: _all, label: l10n.allCategories),
-        for (final category in finance.categories)
-          AppDropdownItem(
-            value: category.id,
-            label: categoryLabel(l10n, category),
-            leading: ColorDot(color: category.color, size: 8),
-          ),
-      ],
-    );
-  }
-}
+// HeaderFilterButton is typed on a non-null value, so "all categories" needs
+// a stand-in for the null filter.
+const _allCategories = '';
 
 const _columns = [
   FixedColumn(104),
@@ -166,12 +147,43 @@ class _TransactionsTable extends StatelessObserverWidget {
         transaction: tx,
       ),
       headerBuilder: (context) => [
-        HeaderText(l10n.columnDate,
-            padding: const EdgeInsets.only(left: AppSizes.spacing16)),
-        HeaderText(l10n.columnDescription,
-            padding: const EdgeInsets.only(left: AppSizes.spacing12)),
-        HeaderText(l10n.columnCategory,
-            padding: const EdgeInsets.only(left: AppSizes.spacing12)),
+        HeaderSortableButton(
+          text: l10n.columnDate,
+          ascending: state.sortBy == TransactionSortBy.date
+              ? state.sortAscending
+              : null,
+          onChanged: (ascending) =>
+              state.setSort(TransactionSortBy.date, ascending: ascending),
+          padding: const EdgeInsets.only(left: AppSizes.spacing16),
+        ),
+        HeaderSortableButton(
+          text: l10n.columnDescription,
+          ascending: state.sortBy == TransactionSortBy.description
+              ? state.sortAscending
+              : null,
+          onChanged: (ascending) => state.setSort(
+            TransactionSortBy.description,
+            ascending: ascending,
+          ),
+          padding: const EdgeInsets.only(left: AppSizes.spacing12),
+        ),
+        HeaderFilterButton<String>(
+          text: l10n.columnCategory,
+          padding: const EdgeInsets.only(left: AppSizes.spacing12),
+          selected: state.categoryFilter ?? _allCategories,
+          active: state.categoryFilter != null,
+          onChanged: (id) =>
+              state.setCategoryFilter(id == _allCategories ? null : id),
+          items: [
+            AppDropdownItem(value: _allCategories, label: l10n.allCategories),
+            for (final category in finance.categories)
+              AppDropdownItem(
+                value: category.id,
+                label: categoryLabel(l10n, category),
+                leading: ColorDot(color: category.color, size: 8),
+              ),
+          ],
+        ),
         HeaderText(
           l10n.columnAmount,
           alignment: Alignment.centerRight,

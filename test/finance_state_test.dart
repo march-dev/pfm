@@ -97,12 +97,14 @@ void main() {
       expect(s.finance.importing, isFalse);
     });
 
-    test('a cancelled picker or a non-statement file changes nothing', () async {
+    test('a cancelled picker or a non-statement file changes nothing',
+        () async {
       final cancelled = await _Session.open(dir);
       expect(await cancelled.finance.importStatement(), isNull);
 
       await cancelled.close();
-      final junk = await _Session.open(dir, picked: Uint8List.fromList([1, 2, 3]));
+      final junk =
+          await _Session.open(dir, picked: Uint8List.fromList([1, 2, 3]));
       expect(await junk.finance.importStatement(), isNull);
       expect(junk.finance.transactions, isEmpty);
     });
@@ -118,7 +120,8 @@ void main() {
       expect(s.overview.stats.incomeCents, 390746);
       expect(s.overview.stats.cashOutCents, 20000);
       expect(s.overview.expenseBreakdown.first.key.id, BuiltInCategories.other,
-          reason: 'rent (1.300€) is the largest single outflow, filed as other');
+          reason:
+              'rent (1.300€) is the largest single outflow, filed as other');
       expect(s.overview.history, hasLength(1));
     });
   });
@@ -143,7 +146,8 @@ void main() {
         scope: AssignmentScope.single,
       );
 
-      expect(s.finance.categoryFor(rainForest.first).id, BuiltInCategories.groceries);
+      expect(s.finance.categoryFor(rainForest.first).id,
+          BuiltInCategories.groceries);
       expect(s.finance.categoryFor(rainForest.last).id, BuiltInCategories.other,
           reason: 'the other Rain Forest purchase is untouched');
       expect(s.finance.rules, isEmpty);
@@ -158,7 +162,8 @@ void main() {
         value: 'RAIN FOREST VAL',
       );
 
-      for (final t in s.finance.transactions.where((t) => t.description.contains('RAIN FOREST'))) {
+      for (final t in s.finance.transactions
+          .where((t) => t.description.contains('RAIN FOREST'))) {
         expect(s.finance.categoryFor(t).id, BuiltInCategories.groceries);
       }
       expect(s.finance.rules.single.kind, RuleKind.exactName);
@@ -172,10 +177,13 @@ void main() {
         scope: AssignmentScope.pattern,
         value: 'transferencia inmediata*sukhonosova',
       );
-      final elena = s.finance.transactions.where((t) => t.description.contains('Sukhonosova'));
+      final elena = s.finance.transactions
+          .where((t) => t.description.contains('Sukhonosova'));
       expect(elena, hasLength(3));
-      expect(elena.map((t) => s.finance.categoryFor(t).id).toSet(), {BuiltInCategories.gifts});
-      expect(s.overview.stats.expenseByCategory[BuiltInCategories.gifts], 2000 + 1000 + 10000);
+      expect(elena.map((t) => s.finance.categoryFor(t).id).toSet(),
+          {BuiltInCategories.gifts});
+      expect(s.overview.stats.expenseByCategory[BuiltInCategories.gifts],
+          2000 + 1000 + 10000);
     });
 
     test('an invalid pattern is rejected and saves nothing', () async {
@@ -189,8 +197,11 @@ void main() {
       expect(s.finance.rules, isEmpty);
     });
 
-    test('a new rule supersedes earlier one-off assignments it covers', () async {
-      final rf = s.finance.transactions.where((t) => t.description.contains('RAIN FOREST')).toList();
+    test('a new rule supersedes earlier one-off assignments it covers',
+        () async {
+      final rf = s.finance.transactions
+          .where((t) => t.description.contains('RAIN FOREST'))
+          .toList();
       await s.finance.assign(
         tx: rf.first,
         categoryId: BuiltInCategories.health,
@@ -207,9 +218,13 @@ void main() {
       expect(s.finance.assignments, isEmpty);
     });
 
-    test('re-applying the same rule replaces it rather than duplicating', () async {
+    test('re-applying the same rule replaces it rather than duplicating',
+        () async {
       final tx = find(s, 'RAIN FOREST');
-      for (final category in [BuiltInCategories.groceries, BuiltInCategories.gifts]) {
+      for (final category in [
+        BuiltInCategories.groceries,
+        BuiltInCategories.gifts
+      ]) {
         await s.finance.assign(
           tx: tx,
           categoryId: category,
@@ -221,9 +236,13 @@ void main() {
       expect(s.finance.categoryFor(tx).id, BuiltInCategories.gifts);
     });
 
-    test('clearing an assignment returns to automatic categorization', () async {
+    test('clearing an assignment returns to automatic categorization',
+        () async {
       final tx = find(s, 'CONSUM');
-      await s.finance.assign(tx: tx, categoryId: BuiltInCategories.gifts, scope: AssignmentScope.single);
+      await s.finance.assign(
+          tx: tx,
+          categoryId: BuiltInCategories.gifts,
+          scope: AssignmentScope.single);
       expect(s.finance.categoryFor(tx).id, BuiltInCategories.gifts);
       await s.finance.clearAssignment(tx);
       expect(s.finance.categoryFor(tx).id, BuiltInCategories.groceries);
@@ -242,10 +261,15 @@ void main() {
     });
 
     test('reassigning changes the month statistics', () async {
-      final before = s.overview.stats.expenseByCategory[BuiltInCategories.groceries]!;
+      final before =
+          s.overview.stats.expenseByCategory[BuiltInCategories.groceries]!;
       final tx = find(s, 'RAIN FOREST');
-      await s.finance.assign(tx: tx, categoryId: BuiltInCategories.groceries, scope: AssignmentScope.single);
-      expect(s.overview.stats.expenseByCategory[BuiltInCategories.groceries], before + tx.amountCents.abs());
+      await s.finance.assign(
+          tx: tx,
+          categoryId: BuiltInCategories.groceries,
+          scope: AssignmentScope.single);
+      expect(s.overview.stats.expenseByCategory[BuiltInCategories.groceries],
+          before + tx.amountCents.abs());
     });
   });
 
@@ -254,14 +278,26 @@ void main() {
       final s = await _Session.open(dir, picked: statement);
       await s.finance.importStatement();
 
-      expect(await s.finance.createCategory('Rent', AppColors.categoryPalette.first), isTrue);
+      expect(
+          await s.finance
+              .createCategory('Rent', AppColors.categoryPalette.first),
+          isTrue);
       final rent = s.finance.customCategories.single;
       expect(rent.name, 'Rent');
 
-      expect(await s.finance.createCategory('rent', AppColors.categoryPalette.first), isFalse);
-      expect(await s.finance.createCategory('groceries', AppColors.categoryPalette.first), isFalse,
+      expect(
+          await s.finance
+              .createCategory('rent', AppColors.categoryPalette.first),
+          isFalse);
+      expect(
+          await s.finance
+              .createCategory('groceries', AppColors.categoryPalette.first),
+          isFalse,
           reason: 'clashes with a built-in name');
-      expect(await s.finance.createCategory('   ', AppColors.categoryPalette.first), isFalse);
+      expect(
+          await s.finance
+              .createCategory('   ', AppColors.categoryPalette.first),
+          isFalse);
 
       final tx = find(s, 'Renta Septiembre');
       await s.finance.assign(
@@ -281,14 +317,17 @@ void main() {
   });
 
   group('cash operations', () {
-    test('insert and withdraw are filed under Cash and stay out of the totals', () async {
+    test('insert and withdraw are filed under Cash and stay out of the totals',
+        () async {
       final s = await _Session.open(dir, picked: statement);
       await s.finance.importStatement();
       final expensesBefore = s.overview.stats.expenseCents;
       final incomeBefore = s.overview.stats.incomeCents;
 
-      await s.finance.addCashOperation(date: DateTime(2026, 9, 20), amountCents: 5000);
-      await s.finance.addCashOperation(date: DateTime(2026, 9, 21), amountCents: -1250, note: 'Market');
+      await s.finance
+          .addCashOperation(date: DateTime(2026, 9, 20), amountCents: 5000);
+      await s.finance.addCashOperation(
+          date: DateTime(2026, 9, 21), amountCents: -1250, note: 'Market');
 
       final stats = s.overview.stats;
       expect(stats.cashInCents, 5000);
@@ -302,23 +341,34 @@ void main() {
       expect(find(s, 'Cash inserted').amountCents, 5000);
     });
 
-    test('a cash withdrawal re-filed as spending counts as an expense', () async {
+    test('a cash withdrawal re-filed as spending counts as an expense',
+        () async {
       final s = await _Session.open(dir, picked: statement);
       await s.finance.importStatement();
       final before = s.overview.stats.expenseCents;
 
-      await s.finance.addCashOperation(date: DateTime(2026, 9, 21), amountCents: -350, note: 'Coffee in cash');
+      await s.finance.addCashOperation(
+          date: DateTime(2026, 9, 21),
+          amountCents: -350,
+          note: 'Coffee in cash');
       final coffee = find(s, 'Coffee in cash');
-      await s.finance.assign(tx: coffee, categoryId: BuiltInCategories.cafeResto, scope: AssignmentScope.single);
+      await s.finance.assign(
+          tx: coffee,
+          categoryId: BuiltInCategories.cafeResto,
+          scope: AssignmentScope.single);
 
       expect(s.overview.stats.expenseCents, before + 350);
     });
 
     test('deleting a manual operation removes it and its assignment', () async {
       final s = await _Session.open(dir);
-      await s.finance.addCashOperation(date: DateTime(2026, 9, 21), amountCents: -350, note: 'x');
+      await s.finance.addCashOperation(
+          date: DateTime(2026, 9, 21), amountCents: -350, note: 'x');
       final tx = s.finance.transactions.single;
-      await s.finance.assign(tx: tx, categoryId: BuiltInCategories.gifts, scope: AssignmentScope.single);
+      await s.finance.assign(
+          tx: tx,
+          categoryId: BuiltInCategories.gifts,
+          scope: AssignmentScope.single);
 
       expect(await s.finance.deleteTransaction(tx), isTrue);
       expect(s.finance.transactions, isEmpty);
@@ -343,14 +393,16 @@ void main() {
         categoryId: BuiltInCategories.gifts,
         scope: AssignmentScope.single,
       );
-      await first.finance.addCashOperation(date: DateTime(2026, 9, 2), amountCents: 700, note: 'Found');
+      await first.finance.addCashOperation(
+          date: DateTime(2026, 9, 2), amountCents: 700, note: 'Found');
       final expected = first.overview.stats;
       await first.close();
 
       final second = await _Session.open(dir);
       expect(second.finance.transactions, hasLength(41));
       expect(second.finance.rules.single.value, 'renta');
-      expect(second.finance.customCategories.single.color, AppColors.categoryPalette[2]);
+      expect(second.finance.customCategories.single.color,
+          AppColors.categoryPalette[2]);
       expect(second.finance.assignments, hasLength(1));
 
       final stats = second.overview.stats;
@@ -365,7 +417,8 @@ void main() {
     test('filters by month, category and search', () async {
       final s = await _Session.open(dir, picked: statement);
       await s.finance.importStatement();
-      await s.finance.addCashOperation(date: DateTime(2026, 8, 30), amountCents: 100, note: 'August');
+      await s.finance.addCashOperation(
+          date: DateTime(2026, 8, 30), amountCents: 100, note: 'August');
 
       expect(s.transactions.visible, hasLength(40), reason: 'September only');
       s.transactions.setAllMonths(true);
@@ -379,13 +432,67 @@ void main() {
       s.transactions.setSearch('  FARMÁCIA  ');
       expect(s.transactions.visible.single.description, contains('FARMACIA'));
       s.transactions.setSearch('elena sukhonosova');
-      expect(s.transactions.visible, hasLength(3), reason: 'matches the merchant name');
+      expect(s.transactions.visible, hasLength(3),
+          reason: 'matches the merchant name');
       s.transactions.setSearch('');
 
       s.period.previous();
       expect(s.period.month, const YearMonth(2026, 8));
       expect(s.transactions.visible.single.description, 'August');
       expect(s.period.canGoNext, isTrue);
+    });
+
+    test('sorts by date either way, and by description with stable ties',
+        () async {
+      final s = await _Session.open(dir, picked: statement);
+      await s.finance.importStatement();
+      s.transactions.setAllMonths(true);
+
+      // Default: newest first.
+      expect(s.transactions.sortBy, TransactionSortBy.date);
+      expect(s.transactions.sortAscending, isFalse);
+      var dates = s.transactions.visible.map((t) => t.date).toList();
+      expect(dates, [...dates]..sort((a, b) => b.compareTo(a)));
+
+      s.transactions.setSort(TransactionSortBy.date, ascending: true);
+      dates = s.transactions.visible.map((t) => t.date).toList();
+      expect(dates, [...dates]..sort());
+      expect(dates.first, DateTime(2026, 9, 6));
+
+      const merchants = MerchantNormalizer();
+      String name(TransactionModel t) =>
+          normalizeText(merchants.merchantOf(t.description));
+
+      s.transactions.setSort(TransactionSortBy.description, ascending: true);
+      var names = s.transactions.visible.map(name).toList();
+      expect(names, [...names]..sort());
+      expect(names.first, 'agencia estatal de administracion tributaria');
+
+      s.transactions.setSort(TransactionSortBy.description, ascending: false);
+      names = s.transactions.visible.map(name).toList();
+      expect(names, [...names]..sort((a, b) => b.compareTo(a)));
+
+      // Equal descriptions stay newest-first in both directions.
+      for (final ascending in [true, false]) {
+        s.transactions
+            .setSort(TransactionSortBy.description, ascending: ascending);
+        final orders = s.transactions.visible
+            .where((t) => name(t) == 'order from restaurant')
+            .map((t) => t.date)
+            .toList();
+        expect(orders, [...orders]..sort((a, b) => b.compareTo(a)),
+            reason: 'ties, ascending=$ascending');
+      }
+    });
+
+    test('sorting applies after filtering', () async {
+      final s = await _Session.open(dir, picked: statement);
+      await s.finance.importStatement();
+      s.transactions.setCategoryFilter(BuiltInCategories.groceries);
+      s.transactions.setSort(TransactionSortBy.date, ascending: true);
+      final dates = s.transactions.visible.map((t) => t.date).toList();
+      expect(dates, hasLength(3));
+      expect(dates, [...dates]..sort());
     });
 
     test('newest transactions come first', () async {

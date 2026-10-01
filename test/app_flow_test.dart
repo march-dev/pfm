@@ -86,7 +86,8 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('overview shows the month totals and category breakdown', (tester) async {
+  testWidgets('overview shows the month totals and category breakdown',
+      (tester) async {
     await boot(tester);
 
     expect(find.text('September 2026'), findsWidgets);
@@ -115,7 +116,122 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('assign a category to every transaction matching a pattern', (tester) async {
+  testWidgets('month picker sits by the scope toggle; summary on the right',
+      (tester) async {
+    await boot(tester);
+    await tester.tap(find.text('Transactions').first);
+    await tester.pumpAndSettle();
+
+    final toggle = tester.getRect(find.byType(SegmentedButton<bool>));
+    final month = tester.getRect(find.byType(MonthSelector));
+    final summary = tester.getRect(find.textContaining('40 transactions'));
+    final title = tester.getRect(find.text('Transactions').last);
+    final importButton = tester.getRect(find.text('Import statement').first);
+
+    expect(month.left, greaterThanOrEqualTo(toggle.right),
+        reason: 'month picker follows the segmented button');
+    expect((month.center.dy - toggle.center.dy).abs(), lessThan(2),
+        reason: 'same row as the segmented button');
+    expect(month.top, greaterThan(title.bottom),
+        reason: 'no longer in the title row');
+    expect(summary.left, greaterThan(month.right),
+        reason: 'summary is right of the filters');
+    expect(importButton.right, greaterThan(summary.right - 40),
+        reason: 'summary right-aligns with the card edge, under the buttons');
+
+    // The picker only makes sense for a single month.
+    await tester.tap(find.text('All time'));
+    await tester.pumpAndSettle();
+    expect(find.byType(MonthSelector), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('column headers sort, and the Category header filters',
+      (tester) async {
+    await boot(tester);
+    await tester.tap(find.text('Transactions').first);
+    await tester.pumpAndSettle();
+
+    // Default is newest first: the 29 Sep DIGI bill leads.
+    double top(String text) => tester.getTopLeft(find.text(text).first).dy;
+    expect(find.text('29/09/2026'), findsWidgets);
+    final newestFirst = top('DIGI SPAIN TELECOM SA');
+
+    // Sorting by date ascending sends it to the bottom (off screen).
+    await tester.tap(find.text('DATE'));
+    await tester.pumpAndSettle();
+    expect(find.text('DIGI SPAIN TELECOM SA'), findsNothing,
+        reason: 'oldest-first pushes the newest rows out of view');
+    expect(find.text('06/09/2026'), findsWidgets);
+    expect(newestFirst, lessThan(300));
+
+    // Description sorting puts the AEAT payments first.
+    await tester.tap(find.text('DESCRIPTION'));
+    await tester.pumpAndSettle();
+    expect(find.text('Agencia Estatal de Administracion Tributaria'),
+        findsWidgets);
+    final aeat = top('Agencia Estatal de Administracion Tributaria');
+    await tester.tap(find.text('DESCRIPTION'));
+    await tester.pumpAndSettle();
+    expect(
+        find.text('Agencia Estatal de Administracion Tributaria'), findsNothing,
+        reason: 'descending moves A… to the end');
+    expect(aeat, lessThan(300));
+
+    // The Category column header is the filter.
+    await tester.tap(find.text('CATEGORY'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(MenuItemButton, 'Groceries'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('3 transactions'), findsOneWidget);
+    expect(find.text('CONSUM V. F.CAT'), findsWidgets);
+    expect(find.text('DIGI SPAIN TELECOM SA'), findsNothing);
+
+    // …and clearing it brings everything back.
+    await tester.tap(find.text('CATEGORY'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(MenuItemButton, 'All categories'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('40 transactions'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+      'the whole Category header cell opens the filter, in sort-header white',
+      (tester) async {
+    await boot(tester);
+    await tester.tap(find.text('Transactions').first);
+    await tester.pumpAndSettle();
+
+    // Tap the far right end of the cell — nowhere near the label or icon.
+    final cell = tester.getRect(find.byType(HeaderFilterButton<String>));
+    expect(cell.width, greaterThan(150));
+    await tester.tapAt(Offset(cell.right - 12, cell.center.dy));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(MenuItemButton, 'Groceries'), findsOneWidget,
+        reason: 'a tap on the empty part of the header opens the menu');
+
+    await tester.tap(find.widgetWithText(MenuItemButton, 'Groceries'));
+    await tester.pumpAndSettle();
+
+    // Active: label and icon use the same bright color as an active sort
+    // header, not the theme's primary.
+    final onSurface = AppTheme.dark().colorScheme.onSurface;
+    final label = tester.widget<Text>(find.text('CATEGORY'));
+    expect(label.style!.color, onSurface);
+    final icon = tester.widget<Icon>(find.descendant(
+      of: find.byType(HeaderFilterButton<String>),
+      matching: find.byIcon(Icons.filter_alt),
+    ));
+    expect(icon.color, onSurface);
+    final sortLabel = tester.widget<Text>(find.text('DATE'));
+    expect(sortLabel.style!.color, onSurface,
+        reason: 'the active sort header is the reference color');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('assign a category to every transaction matching a pattern',
+      (tester) async {
     await boot(tester);
     await tester.tap(find.text('Transactions').first);
     await tester.pumpAndSettle();
@@ -123,8 +239,10 @@ void main() {
     await openTransaction(tester, 'rain forest');
     expect(find.text('Assign category'), findsOneWidget);
     expect(find.text('Just this transaction'), findsOneWidget);
-    expect(find.text('All transactions from "RAIN FOREST VAL"'), findsOneWidget);
-    expect(find.text('2 transactions'), findsOneWidget, reason: 'exact-name preview');
+    expect(
+        find.text('All transactions from "RAIN FOREST VAL"'), findsOneWidget);
+    expect(find.text('2 transactions'), findsOneWidget,
+        reason: 'exact-name preview');
 
     // Pick "Groceries" in the dialog, then a pattern scope.
     await tester.tap(find.descendant(
@@ -133,15 +251,18 @@ void main() {
     ));
     await tester.tap(find.text('All transactions matching a pattern'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.widgetWithText(TextField, 'RAIN FOREST VAL'), 'rain*val');
+    await tester.enterText(
+        find.widgetWithText(TextField, 'RAIN FOREST VAL'), 'rain*val');
     await tester.pumpAndSettle();
     expect(find.text('2 transactions'), findsNWidgets(2),
         reason: 'exact-name subtitle + live pattern preview');
 
-    await tester.enterText(find.widgetWithText(TextField, 'rain*val'), '/(broken/');
+    await tester.enterText(
+        find.widgetWithText(TextField, 'rain*val'), '/(broken/');
     await tester.pumpAndSettle();
     expect(find.text('Not a valid pattern.'), findsOneWidget);
-    await tester.enterText(find.widgetWithText(TextField, '/(broken/'), 'rain*val');
+    await tester.enterText(
+        find.widgetWithText(TextField, '/(broken/'), 'rain*val');
     await tester.pumpAndSettle();
 
     await tapAndSave(tester, find.text('Apply'));
@@ -155,7 +276,8 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('cash operation dialog validates and records a withdrawal', (tester) async {
+  testWidgets('cash operation dialog validates and records a withdrawal',
+      (tester) async {
     await boot(tester);
     await tester.tap(find.text('Transactions').first);
     await tester.pumpAndSettle();
@@ -171,10 +293,12 @@ void main() {
 
     await tester.tap(find.text('Withdraw cash'));
     await tester.enterText(find.widgetWithText(TextField, '0,00'), '12,50');
-    await tester.enterText(find.widgetWithText(TextField, 'What was it for?'), 'Market stall');
+    await tester.enterText(
+        find.widgetWithText(TextField, 'What was it for?'), 'Market stall');
     await tapAndSave(tester, find.text('Save'));
 
-    expect(find.text('Cash operation'), findsOneWidget, reason: 'dialog closed');
+    expect(find.text('Cash operation'), findsOneWidget,
+        reason: 'dialog closed');
     await tester.enterText(find.byType(TextField).first, 'market');
     await tester.pumpAndSettle();
     expect(find.text('Market stall'), findsWidgets);
@@ -191,7 +315,8 @@ void main() {
 
     await tester.tap(find.text('New category'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.widgetWithText(TextField, 'Category name'), 'Pets');
+    await tester.enterText(
+        find.widgetWithText(TextField, 'Category name'), 'Pets');
     await tapAndSave(tester, find.text('Create'));
 
     // Back in the assign dialog with the new category present and selected.
@@ -201,7 +326,8 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('every screen lays out without overflow at a small window', (tester) async {
+  testWidgets('every screen lays out without overflow at a small window',
+      (tester) async {
     await boot(tester);
     tester.view.physicalSize = const Size(1000, 640);
     await tester.pumpAndSettle();

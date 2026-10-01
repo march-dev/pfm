@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../../theme/app_sizes.dart';
+import '../context_menu/context_menu.dart';
 import '../dividers/hairline_divider.dart';
+import '../dropdowns/app_dropdown.dart';
 import '../indicators/shimmer.dart';
 import 'animated_diff_list.dart';
 import 'hoverable_row.dart';
@@ -190,6 +192,100 @@ class HeaderSortableButton extends AppTableHeaderCell {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// A column header that filters its column: the label with a filter glyph,
+/// opening the same compact menu as [AppDropdown] from a tap anywhere in
+/// the header cell. While a filter is [active] the glyph is filled and the
+/// chosen item's [AppDropdownItem.leading] (e.g. a color dot) is shown, so
+/// the header itself says what the table is currently filtered by.
+///
+/// Colored like [HeaderSortableButton]: bright white when active, muted
+/// otherwise.
+class HeaderFilterButton<T> extends AppTableHeaderCell {
+  const HeaderFilterButton({
+    super.key,
+    required this.text,
+    required this.items,
+    required this.selected,
+    required this.active,
+    required this.onChanged,
+    this.alignment = Alignment.centerLeft,
+    this.padding = EdgeInsets.zero,
+  });
+
+  final String text;
+  final List<AppDropdownItem<T>> items;
+  final T selected;
+
+  /// Whether [selected] is an actual filter, as opposed to the "show
+  /// everything" item.
+  final bool active;
+  final ValueChanged<T> onChanged;
+  final Alignment alignment;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final color = active
+        ? colorScheme.onSurface
+        : colorScheme.onSurface.withValues(alpha: 0.6);
+    final current = items.firstWhere(
+      (item) => item.value == selected,
+      orElse: () => items.first,
+    );
+
+    return MenuAnchor(
+      style: compactMenuStyle(context),
+      alignmentOffset: const Offset(0, AppSizes.spacing8),
+      menuChildren: [
+        for (final item in items)
+          MenuItemButton(
+            style: compactMenuButtonStyle(context),
+            leadingIcon: item.leading,
+            trailingIcon: item.value == selected
+                ? const Icon(
+                    CupertinoIcons.checkmark_alt,
+                    size: AppSizes.iconSmall,
+                  )
+                : null,
+            onPressed: () => onChanged(item.value),
+            child: Text(item.label),
+          ),
+      ],
+      builder: (context, controller, child) => _ClippedInkAlign(
+        onTap: () => controller.isOpen ? controller.close() : controller.open(),
+        padding: padding,
+        alignment: alignment,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                text.toUpperCase(),
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context)
+                    .textTheme
+                    .labelSmall!
+                    .copyWith(color: color),
+              ),
+            ),
+            if (active && current.leading != null) ...[
+              const SizedBox(width: AppSizes.spacing6),
+              current.leading!,
+            ],
+            const SizedBox(width: AppSizes.spacing4),
+            Icon(
+              active ? Icons.filter_alt : Icons.filter_alt_outlined,
+              size: AppSizes.iconXSmall,
+              color: color,
+            ),
+          ],
+        ),
       ),
     );
   }

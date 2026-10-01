@@ -13,7 +13,8 @@ void main() {
       expect(SantanderStatementParser.parseAmountCents('-1.300,00€'), -130000);
       expect(SantanderStatementParser.parseAmountCents('3.907,46€'), 390746);
       expect(SantanderStatementParser.parseAmountCents('-0,95€'), -95);
-      expect(SantanderStatementParser.parseAmountCents('2.177,28€ EUR'), 217728);
+      expect(
+          SantanderStatementParser.parseAmountCents('2.177,28€ EUR'), 217728);
     });
 
     test('parses plain and English formatting', () {
