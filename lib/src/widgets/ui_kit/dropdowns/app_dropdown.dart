@@ -101,17 +101,28 @@ class _Trigger<T> extends StatelessWidget {
               right: AppSizes.spacing10,
             ),
             child: Row(
+              // min + spaceBetween: the field is as narrow as its label
+              // allows, and when [minWidth] makes it wider the arrow stays
+              // pinned to the right edge instead of trailing the label.
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (item.leading != null) ...[
-                  item.leading!,
-                  const SizedBox(width: AppSizes.spacing8),
-                ],
                 Flexible(
-                  child: Text(
-                    item.label,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (item.leading != null) ...[
+                        item.leading!,
+                        const SizedBox(width: AppSizes.spacing8),
+                      ],
+                      Flexible(
+                        child: Text(
+                          item.label,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: AppSizes.spacing8),

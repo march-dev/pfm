@@ -52,6 +52,10 @@ class PrimaryButton extends StatelessWidget {
         maximumSize: const Size(double.infinity, AppSizes.controlHeight),
         padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacing16),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        // The theme's density is platform-dependent (compact on desktop),
+        // and compact takes another 8px off minimumSize — a 32px button
+        // would render at 24 on macOS.
+        visualDensity: VisualDensity.standard,
       ),
       // Same reasoning as CircleIconButton's own icon/spinner swap — a
       // plain ternary between two different widget types can't animate on

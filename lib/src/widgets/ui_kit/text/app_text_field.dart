@@ -47,6 +47,30 @@ class AppTextField extends StatelessWidget {
   // whatever sits next to it. Focused is just a lightened step of the
   // same outline (not a different hue), so it reads as "this field is
   // active" without shouting.
+  // The outline is drawn around the text plus this padding — constraints
+  // alone only centre a text-hugging outline inside a taller box — so the
+  // vertical padding is whatever tops the real line height up to the shared
+  // control height. Measured rather than assumed, since the line height
+  // depends on the theme's font metrics. Stays single-line (unlike
+  // `expands`, which would turn Enter into a newline instead of a submit).
+  static EdgeInsets _defaultPadding(BuildContext context) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: 'A',
+        style: Theme.of(context).textTheme.bodyMedium,
+      ),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    final vertical =
+        ((AppSizes.controlHeight - painter.height) / 2).clamp(0.0, 16.0);
+    painter.dispose();
+    return EdgeInsets.symmetric(
+      horizontal: AppSizes.spacing12,
+      vertical: vertical,
+    );
+  }
+
   InputDecoration _decoration(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -72,28 +96,32 @@ class AppTextField extends StatelessWidget {
       prefixIconConstraints: prefixIconConstraints,
       suffixIcon: suffixIcon,
       suffixIconConstraints: suffixIconConstraints,
-      // Pinned to the shared control height; the text is centred inside it
-      // rather than relying on padding to add up to the right number.
-      constraints: const BoxConstraints.tightFor(height: AppSizes.controlHeight),
-      contentPadding: contentPadding ??
-          const EdgeInsets.symmetric(horizontal: AppSizes.spacing12),
+      constraints:
+          const BoxConstraints.tightFor(height: AppSizes.controlHeight),
+      contentPadding: contentPadding ?? _defaultPadding(context),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      autofocus: autofocus,
-      style: Theme.of(context).textTheme.bodyMedium,
-      decoration: _decoration(context),
-      onChanged: onChanged,
-      onSubmitted: onSubmitted,
-      textAlignVertical: TextAlignVertical.center,
-      // Otherwise a tap outside leaves the field focused, pulling in the
-      // theme's default focused-border color until something else steals
-      // focus instead.
-      onTapOutside: (_) => FocusScope.of(context).unfocus(),
+    // InputDecorator shrinks by the theme's visual density, which is compact
+    // on desktop — a field padded to AppSizes.controlHeight would paint 8px
+    // short on macOS. Pinning standard keeps the height platform-independent.
+    return Theme(
+      data: Theme.of(context).copyWith(visualDensity: VisualDensity.standard),
+      child: TextField(
+        controller: controller,
+        autofocus: autofocus,
+        style: Theme.of(context).textTheme.bodyMedium,
+        textAlignVertical: TextAlignVertical.center,
+        decoration: _decoration(context),
+        onChanged: onChanged,
+        onSubmitted: onSubmitted,
+        // Otherwise a tap outside leaves the field focused, pulling in the
+        // theme's default focused-border color until something else steals
+        // focus instead.
+        onTapOutside: (_) => FocusScope.of(context).unfocus(),
+      ),
     );
   }
 }
