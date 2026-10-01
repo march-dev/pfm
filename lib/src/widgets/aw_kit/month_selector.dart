@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -40,28 +41,38 @@ class MonthSelector extends StatelessWidget {
           onPressed: onPrevious,
           backgroundColor: Colors.transparent,
           color: colorScheme.onSurface,
-          size: 32,
+          size: AppSizes.controlHeight,
         ),
-        PopupMenuButton<YearMonth>(
-          enabled: months.isNotEmpty,
-          tooltip: '',
-          onSelected: onSelected,
-          itemBuilder: (context) => [
+        MenuAnchor(
+          style: compactMenuStyle(context),
+          alignmentOffset: const Offset(0, AppSizes.spacing8),
+          menuChildren: [
             for (final m in months)
-              PopupMenuItem(
-                value: m,
-                child: Text(
-                  label(m),
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+              MenuItemButton(
+                style: compactMenuButtonStyle(context),
+                trailingIcon: m == month
+                    ? const Icon(CupertinoIcons.checkmark_alt,
+                        size: AppSizes.iconSmall)
+                    : null,
+                onPressed: () => onSelected(m),
+                child: Text(label(m)),
               ),
           ],
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 132),
-            child: Text(
-              label(month),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleSmall,
+          builder: (context, controller, child) => InkWell(
+            borderRadius: BorderRadius.circular(AppSizes.controlHeight / 2),
+            onTap: months.isEmpty
+                ? null
+                : () =>
+                    controller.isOpen ? controller.close() : controller.open(),
+            child: Container(
+              height: AppSizes.controlHeight,
+              constraints: const BoxConstraints(minWidth: 132),
+              alignment: Alignment.center,
+              child: Text(
+                label(month),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
             ),
           ),
         ),
@@ -70,7 +81,7 @@ class MonthSelector extends StatelessWidget {
           onPressed: onNext,
           backgroundColor: Colors.transparent,
           color: colorScheme.onSurface,
-          size: 32,
+          size: AppSizes.controlHeight,
         ),
       ],
     );

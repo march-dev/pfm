@@ -72,7 +72,11 @@ class AppTextField extends StatelessWidget {
       prefixIconConstraints: prefixIconConstraints,
       suffixIcon: suffixIcon,
       suffixIconConstraints: suffixIconConstraints,
-      contentPadding: contentPadding,
+      // Pinned to the shared control height; the text is centred inside it
+      // rather than relying on padding to add up to the right number.
+      constraints: const BoxConstraints.tightFor(height: AppSizes.controlHeight),
+      contentPadding: contentPadding ??
+          const EdgeInsets.symmetric(horizontal: AppSizes.spacing12),
     );
   }
 
@@ -85,6 +89,7 @@ class AppTextField extends StatelessWidget {
       decoration: _decoration(context),
       onChanged: onChanged,
       onSubmitted: onSubmitted,
+      textAlignVertical: TextAlignVertical.center,
       // Otherwise a tap outside leaves the field focused, pulling in the
       // theme's default focused-border color until something else steals
       // focus instead.

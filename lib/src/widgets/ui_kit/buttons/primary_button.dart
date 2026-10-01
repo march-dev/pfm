@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../theme/app_sizes.dart';
 import '../indicators/loading_spinner.dart';
 
 /// A filled icon+label button whose icon swaps to a [LoadingSpinner] while
@@ -45,6 +46,12 @@ class PrimaryButton extends StatelessWidget {
         // SplitButton's own label style, so every button-like control
         // reads at the same size/weight.
         textStyle: Theme.of(context).textTheme.titleSmall,
+        // Material's default button is 40px tall; every control in a row
+        // shares AppSizes.controlHeight instead.
+        minimumSize: const Size(0, AppSizes.controlHeight),
+        maximumSize: const Size(double.infinity, AppSizes.controlHeight),
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacing16),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
       // Same reasoning as CircleIconButton's own icon/spinner swap — a
       // plain ternary between two different widget types can't animate on

@@ -152,10 +152,16 @@ class _CashOperationDialogState extends State<_CashOperationDialog> {
           const SizedBox(height: AppSizes.spacing12),
           LabeledField(
             label: l10n.dateLabel,
-            child: OutlinedButton.icon(
-              onPressed: _pickDate,
-              icon: const Icon(Icons.calendar_today_outlined, size: AppSizes.iconSmall),
-              label: Text(DateFormat.yMMMd().format(_date)),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: PrimaryButton(
+                onPressed: _pickDate,
+                icon: const Icon(Icons.calendar_today_outlined,
+                    size: AppSizes.iconMedium),
+                label: Text(DateFormat.yMMMd().format(_date)),
+                backgroundColor: colorScheme.surfaceContainerHighest,
+                foregroundColor: colorScheme.onSurface,
+              ),
             ),
           ),
           const SizedBox(height: AppSizes.spacing12),
@@ -170,10 +176,8 @@ class _CashOperationDialogState extends State<_CashOperationDialog> {
           const SizedBox(height: AppSizes.spacing12),
           Text(
             l10n.cashDialogHint,
-            style: Theme.of(context)
-                .textTheme
-                .labelLarge!
-                .copyWith(color: muted),
+            style:
+                Theme.of(context).textTheme.labelLarge!.copyWith(color: muted),
           ),
         ],
       ),

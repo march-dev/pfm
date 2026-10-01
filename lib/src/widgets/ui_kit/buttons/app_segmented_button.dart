@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../theme/app_sizes.dart';
+
 /// A single-select [SegmentedButton] preset for this app's own toggles
 /// (explorer's grouping switch, settings' per-language IDE picker): hides
 /// the built-in selected-checkmark icon and paints unselected segments in
@@ -53,6 +55,12 @@ class AppSegmentedButton<T> extends StatelessWidget {
         // SplitButton's own label style, so every button-like control
         // reads at the same size/weight.
         textStyle: Theme.of(context).textTheme.titleSmall,
+        // SegmentedButton ignores size overrides: its height is a fixed 40
+        // plus the visual density's adjustment, and compact is exactly -8,
+        // which lands on AppSizes.controlHeight.
+        visualDensity: VisualDensity.compact,
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacing12),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
     );
   }

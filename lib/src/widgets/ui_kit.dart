@@ -18,6 +18,7 @@ export 'ui_kit/charts/ranked_breakdown_list.dart';
 export 'ui_kit/charts/size_bar.dart';
 export 'ui_kit/context_menu/context_menu.dart';
 export 'ui_kit/dialogs/confirm_dialog.dart';
+export 'ui_kit/dropdowns/app_dropdown.dart';
 export 'ui_kit/dialogs/dialog_shell.dart';
 export 'ui_kit/dialogs/text_input_dialog.dart';
 export 'ui_kit/dividers/hairline_divider.dart';

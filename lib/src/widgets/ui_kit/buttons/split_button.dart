@@ -29,7 +29,7 @@ class SplitButton<T> extends StatelessWidget {
     this.loading = false,
     this.disabled = false,
     this.menuTooltip,
-    this.height = 32,
+    this.height = AppSizes.controlHeight,
     this.backgroundColor,
     this.foregroundColor,
   });

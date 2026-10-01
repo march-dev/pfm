@@ -83,10 +83,6 @@ class _SearchFieldState extends State<SearchField> {
                   setState(() {});
                 },
               ),
-        // 1px off each side from before — shaves the field's overall
-        // height from 34 to 32, aligning it with this row's other
-        // controls (e.g. the grouping toggle/refresh button).
-        contentPadding: const EdgeInsets.symmetric(vertical: 10.5),
       ),
     );
   }

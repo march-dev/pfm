@@ -88,7 +88,8 @@ class _CategoryList extends StatelessObserverWidget {
               ),
               child: Row(
                 children: [
-                  Icon(categoryIcon(category), size: AppSizes.iconMedium, color: category.color),
+                  Icon(categoryIcon(category),
+                      size: AppSizes.iconMedium, color: category.color),
                   const SizedBox(width: AppSizes.spacing12),
                   Expanded(
                     child: Text(
@@ -103,7 +104,10 @@ class _CategoryList extends StatelessObserverWidget {
                       child: PillBadge(
                         child: Text(
                           l10n.notCounted,
-                          style: Theme.of(context).textTheme.labelLarge!.copyWith(color: muted),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge!
+                              .copyWith(color: muted),
                         ),
                       ),
                     ),
@@ -111,7 +115,10 @@ class _CategoryList extends StatelessObserverWidget {
                     PillBadge(
                       child: Text(
                         l10n.incomeBadge,
-                        style: Theme.of(context).textTheme.labelLarge!.copyWith(color: muted),
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge!
+                            .copyWith(color: muted),
                       ),
                     ),
                   if (!category.builtIn)
@@ -120,12 +127,14 @@ class _CategoryList extends StatelessObserverWidget {
                       backgroundColor: Colors.transparent,
                       color: muted,
                       tooltip: l10n.deleteCategoryTooltip,
-                      icon: const Icon(Icons.delete_outline, size: AppSizes.iconMedium),
+                      icon: const Icon(Icons.delete_outline,
+                          size: AppSizes.iconMedium),
                       onPressed: () async {
                         final confirmed = await showConfirmDialog(
                           context,
                           title: l10n.deleteCategoryTitle,
-                          message: l10n.deleteCategoryMessage(category.name ?? ''),
+                          message:
+                              l10n.deleteCategoryMessage(category.name ?? ''),
                           confirmLabel: l10n.delete,
                         );
                         if (confirmed) await finance.deleteCategory(category);
@@ -142,9 +151,13 @@ class _CategoryList extends StatelessObserverWidget {
 
 const _ruleColumns = [
   FixedColumn(108),
+  DividerColumn(),
   FlexColumn(flex: 3),
+  DividerColumn(),
   FixedColumn(200),
+  DividerColumn(),
   FixedColumn(84),
+  DividerColumn(),
   FixedColumn(AppSizes.actionColumnSize + AppSizes.spacing12 * 2),
 ];
 
@@ -166,9 +179,12 @@ class _RulesTable extends StatelessObserverWidget {
       rowKey: (rule) => ValueKey(rule.id),
       emptyMessage: l10n.rulesEmpty,
       headerBuilder: (context) => [
-        HeaderText(l10n.columnRuleType, padding: const EdgeInsets.only(left: AppSizes.spacing16)),
-        HeaderText(l10n.columnRuleMatch, padding: const EdgeInsets.only(left: AppSizes.spacing12)),
-        HeaderText(l10n.columnCategory),
+        HeaderText(l10n.columnRuleType,
+            padding: const EdgeInsets.only(left: AppSizes.spacing16)),
+        HeaderText(l10n.columnRuleMatch,
+            padding: const EdgeInsets.only(left: AppSizes.spacing12)),
+        HeaderText(l10n.columnCategory,
+            padding: const EdgeInsets.only(left: AppSizes.spacing12)),
         HeaderText(
           l10n.columnMatches,
           alignment: Alignment.centerRight,
@@ -183,7 +199,9 @@ class _RulesTable extends StatelessObserverWidget {
             alignment: Alignment.centerLeft,
             child: PillBadge(
               child: Text(
-                rule.kind == RuleKind.exactName ? l10n.ruleExactName : l10n.rulePattern,
+                rule.kind == RuleKind.exactName
+                    ? l10n.ruleExactName
+                    : l10n.rulePattern,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
@@ -200,15 +218,18 @@ class _RulesTable extends StatelessObserverWidget {
             ),
           ),
         ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Observer(
-            builder: (context) {
-              final category = finance.categoryById[rule.categoryId];
-              return category == null
-                  ? const SizedBox.shrink()
-                  : CategoryChip(category: category);
-            },
+        Padding(
+          padding: const EdgeInsets.only(left: AppSizes.spacing12),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Observer(
+              builder: (context) {
+                final category = finance.categoryById[rule.categoryId];
+                return category == null
+                    ? const SizedBox.shrink()
+                    : CategoryChip(category: category);
+              },
+            ),
           ),
         ),
         Padding(
@@ -218,7 +239,10 @@ class _RulesTable extends StatelessObserverWidget {
             child: Observer(
               builder: (context) => Text(
                 '${finance.matching(rule.kind, rule.value).length}',
-                style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: muted),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: muted),
               ),
             ),
           ),

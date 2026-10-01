@@ -26,6 +26,7 @@ class CompositionBar<T> extends StatelessWidget {
     this.onLegendTap,
     this.isSelected,
     this.maxLegendEntries = 8,
+    this.showLegend = true,
     this.barHeight = 10,
     this.loading = false,
   });
@@ -56,7 +57,13 @@ class CompositionBar<T> extends StatelessWidget {
   /// giving no visual sign of which one (if any) is currently the active
   /// filter. Null (the default) means no entry is ever highlighted.
   final bool Function(T)? isSelected;
+
+  /// How many entries the bar draws (and, when [showLegend], lists).
   final int maxLegendEntries;
+
+  /// Set to false to draw only the bar — for a caller that lists the
+  /// entries itself right underneath (e.g. as richer rows).
+  final bool showLegend;
   final double barHeight;
 
   /// True while [counts] is empty only because real data hasn't arrived
@@ -191,23 +198,26 @@ class CompositionBar<T> extends StatelessWidget {
             },
           ),
         ),
-        const SizedBox(height: AppSizes.spacing12),
-        Wrap(
-          spacing: AppSizes.spacing12,
-          runSpacing: AppSizes.spacing6,
-          children: [
-            for (final entry in shown)
-              _LegendEntry(
-                color: colorOf(entry.key),
-                label: labelOf(entry.key),
-                valueLabel: valueLabelOf?.call(entry.value),
-                fraction: entry.value / total,
-                onTap:
-                    onLegendTap == null ? null : () => onLegendTap!(entry.key),
-                selected: isSelected?.call(entry.key) ?? false,
-              ),
-          ],
-        ),
+        if (showLegend) ...[
+          const SizedBox(height: AppSizes.spacing12),
+          Wrap(
+            spacing: AppSizes.spacing12,
+            runSpacing: AppSizes.spacing6,
+            children: [
+              for (final entry in shown)
+                _LegendEntry(
+                  color: colorOf(entry.key),
+                  label: labelOf(entry.key),
+                  valueLabel: valueLabelOf?.call(entry.value),
+                  fraction: entry.value / total,
+                  onTap: onLegendTap == null
+                      ? null
+                      : () => onLegendTap!(entry.key),
+                  selected: isSelected?.call(entry.key) ?? false,
+                ),
+            ],
+          ),
+        ],
       ],
     );
   }

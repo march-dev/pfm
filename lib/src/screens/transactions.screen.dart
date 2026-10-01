@@ -97,58 +97,46 @@ class _TransactionsHeader extends StatelessObserverWidget {
   }
 }
 
-class _CategoryFilter extends StatelessWidget {
+class _CategoryFilter extends StatelessObserverWidget {
   const _CategoryFilter({required this.state, required this.finance});
 
   final TransactionsState state;
   final FinanceState finance;
 
+  // AppDropdown is typed on a non-null value, so "all categories" needs a
+  // stand-in for null.
+  static const _all = '';
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacing12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(AppSizes.radiusXLarge),
-        border: Border.all(color: colorScheme.outline),
-      ),
-      child: Observer(
-        builder: (context) => DropdownButtonHideUnderline(
-          child: DropdownButton<String?>(
-            value: state.categoryFilter,
-            isDense: true,
-            borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-            style: Theme.of(context).textTheme.bodyMedium,
-            items: [
-              DropdownMenuItem(value: null, child: Text(l10n.allCategories)),
-              for (final category in finance.categories)
-                DropdownMenuItem(
-                  value: category.id,
-                  child: Row(
-                    children: [
-                      ColorDot(color: category.color, size: 8),
-                      const SizedBox(width: AppSizes.spacing8),
-                      Text(categoryLabel(l10n, category)),
-                    ],
-                  ),
-                ),
-            ],
-            onChanged: state.setCategoryFilter,
+    return AppDropdown<String>(
+      minWidth: 180,
+      selected: state.categoryFilter ?? _all,
+      onChanged: (id) => state.setCategoryFilter(id == _all ? null : id),
+      items: [
+        AppDropdownItem(value: _all, label: l10n.allCategories),
+        for (final category in finance.categories)
+          AppDropdownItem(
+            value: category.id,
+            label: categoryLabel(l10n, category),
+            leading: ColorDot(color: category.color, size: 8),
           ),
-        ),
-      ),
+      ],
     );
   }
 }
 
 const _columns = [
   FixedColumn(104),
+  DividerColumn(),
   FlexColumn(flex: 4),
+  DividerColumn(),
   FixedColumn(220),
+  DividerColumn(),
   FixedColumn(128),
+  DividerColumn(),
   FixedColumn(AppSizes.actionColumnSize + AppSizes.spacing12 * 2),
 ];
 
@@ -178,9 +166,12 @@ class _TransactionsTable extends StatelessObserverWidget {
         transaction: tx,
       ),
       headerBuilder: (context) => [
-        HeaderText(l10n.columnDate, padding: const EdgeInsets.only(left: AppSizes.spacing16)),
-        HeaderText(l10n.columnDescription, padding: const EdgeInsets.only(left: AppSizes.spacing12)),
-        HeaderText(l10n.columnCategory),
+        HeaderText(l10n.columnDate,
+            padding: const EdgeInsets.only(left: AppSizes.spacing16)),
+        HeaderText(l10n.columnDescription,
+            padding: const EdgeInsets.only(left: AppSizes.spacing12)),
+        HeaderText(l10n.columnCategory,
+            padding: const EdgeInsets.only(left: AppSizes.spacing12)),
         HeaderText(
           l10n.columnAmount,
           alignment: Alignment.centerRight,
@@ -197,7 +188,10 @@ class _TransactionsTable extends StatelessObserverWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 dateFormat.format(tx.date),
-                style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: muted),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: muted),
               ),
             ),
           ),
@@ -217,7 +211,10 @@ class _TransactionsTable extends StatelessObserverWidget {
                     tx.description,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(color: muted),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall!
+                        .copyWith(color: muted),
                   ),
               ],
             ),
@@ -226,16 +223,19 @@ class _TransactionsTable extends StatelessObserverWidget {
           // outside the Observer scope wrapping this build() — without its
           // own Observer here, re-filing a transaction wouldn't repaint
           // its chip until something else happened to rebuild the row.
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Observer(
-              builder: (context) => CategoryChip(
-                category: finance.categoryFor(tx),
-                pinned: finance.assignments.containsKey(tx.id),
-                onTap: () => showAssignCategoryDialog(
-                  context,
-                  finance: finance,
-                  transaction: tx,
+          Padding(
+            padding: const EdgeInsets.only(left: AppSizes.spacing12),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Observer(
+                builder: (context) => CategoryChip(
+                  category: finance.categoryFor(tx),
+                  pinned: finance.assignments.containsKey(tx.id),
+                  onTap: () => showAssignCategoryDialog(
+                    context,
+                    finance: finance,
+                    transaction: tx,
+                  ),
                 ),
               ),
             ),
@@ -245,7 +245,8 @@ class _TransactionsTable extends StatelessObserverWidget {
             child: Align(
               alignment: Alignment.centerRight,
               child: Text(
-                formatCents(tx.amountCents, showSign: true, currency: tx.currency),
+                formatCents(tx.amountCents,
+                    showSign: true, currency: tx.currency),
                 style: Theme.of(context).textTheme.titleSmall!.copyWith(
                       color: tx.isIncoming ? AppColors.income : null,
                     ),
@@ -259,7 +260,8 @@ class _TransactionsTable extends StatelessObserverWidget {
                 backgroundColor: Colors.transparent,
                 color: muted,
                 tooltip: l10n.deleteTransactionTooltip,
-                icon: const Icon(Icons.delete_outline, size: AppSizes.iconLarge),
+                icon:
+                    const Icon(Icons.delete_outline, size: AppSizes.iconLarge),
                 onPressed: () async {
                   final confirmed = await showConfirmDialog(
                     context,

@@ -19,7 +19,7 @@ class RailContainer extends StatelessWidget {
       // Wider than a stock NavigationRail's own 80/88px collapsed width —
       // "Dashboard" (the longest label the real rail shows) was clipping/
       // wrapping at that width against this shell's own pill/label layout.
-      width: 96,
+      width: 108,
       child: AppCard(
         margin: const EdgeInsets.fromLTRB(
           AppSizes.spacing16,

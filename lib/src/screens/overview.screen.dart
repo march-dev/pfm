@@ -169,7 +169,8 @@ class _CategoryCard extends StatelessObserverWidget {
               colorOf: (c) => c.color,
               labelOf: (c) => categoryLabel(l10n, c),
               valueLabelOf: formatCents,
-              maxLegendEntries: 0,
+              maxLegendEntries: breakdown.length,
+              showLegend: false,
               emptyIcon: Icons.savings_outlined,
               emptyTitle: l10n.nothingSpentTitle,
               emptyMessage: l10n.nothingSpentMessage,
@@ -217,8 +218,11 @@ class _CategoryCard extends StatelessObserverWidget {
 
 const _historyColumns = [
   FlexColumn(flex: 3),
+  DividerColumn(),
   FlexColumn(flex: 3),
+  DividerColumn(),
   FlexColumn(flex: 3),
+  DividerColumn(),
   FlexColumn(flex: 3),
 ];
 

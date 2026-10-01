@@ -48,6 +48,11 @@ abstract final class AppSizes {
   // rowIconSize so the column reads as square.
   static const actionColumnSize = 40.0;
 
+  // The height of every interactive control that sits in a row with others
+  // — text field, button, segmented button, split button, dropdown — so
+  // they line up edge to edge.
+  static const controlHeight = 32.0;
+
   // Every hairline border/divider in the app is this thick.
   static const borderWidth = 1.0;
 }
