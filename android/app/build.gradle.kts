@@ -7,7 +7,7 @@ plugins {
 
 android {
     // TODO: Specify your own unique namespace
-    namespace = "march.dev.flutter_project_template"
+    namespace = "march.dev.pfm"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,7 +22,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "march.dev.flutter_project_template"
+        applicationId = "march.dev.pfm"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

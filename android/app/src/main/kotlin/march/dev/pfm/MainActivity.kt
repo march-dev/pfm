@@ -1,4 +1,4 @@
-package march.dev.flutter_project_template
+package march.dev.pfm
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -20,15 +20,41 @@ void main() {
     );
   });
 
-  tearDown(() async {
-    await Hive.close();
-    dir.deleteSync(recursive: true);
-  });
+  // Hive does real disk I/O, but widget tests run in fake-async: a save
+  // that awaits several writes in a row only advances one step per real-time
+  // wait. So alternate short real waits with frame pumps until it drains.
+  Future<void> settleIo(WidgetTester tester) async {
+    for (var i = 0; i < 15; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 40)),
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    await tester.pumpAndSettle();
+  }
+
+  // Taps a button whose handler saves to Hive. Dispatching the tap from the
+  // real zone keeps the whole async save chain on the real event loop,
+  // instead of stranding its I/O callbacks in the fake-async zone.
+  Future<void> tapAndSave(WidgetTester tester, Finder finder) async {
+    await tester.runAsync(() => tester.tap(finder));
+    await settleIo(tester);
+  }
 
   Future<void> boot(WidgetTester tester, {bool seed = true}) async {
     tester.view.physicalSize = const Size(1440, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+    // Writes started by the UI are chains of real I/O hops whose callbacks
+    // land in the test's fake-async zone; pump until they drain, or closing
+    // Hive afterwards would wait on a write that can never finish.
+    addTearDown(() async {
+      await settleIo(tester);
+      await tester.runAsync(() async {
+        await Hive.close();
+        dir.deleteSync(recursive: true);
+      });
+    });
 
     await tester.runAsync(() async {
       final deps = await DependencyResolver.create();
@@ -40,19 +66,6 @@ void main() {
       }
       runApp(App(dependencies: deps));
     });
-    await tester.pumpAndSettle();
-  }
-
-  // Hive does real disk I/O, but widget tests run in fake-async: a save
-  // that awaits several writes in a row only advances one step per real-time
-  // wait. So alternate short real waits with frame pumps until it drains.
-  Future<void> settleIo(WidgetTester tester) async {
-    for (var i = 0; i < 15; i++) {
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 40)),
-      );
-      await tester.pump(const Duration(milliseconds: 50));
-    }
     await tester.pumpAndSettle();
   }
 
@@ -131,8 +144,7 @@ void main() {
     await tester.enterText(find.widgetWithText(TextField, '/(broken/'), 'rain*val');
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Apply'));
-    await settleIo(tester);
+    await tapAndSave(tester, find.text('Apply'));
     expect(find.text('Assign category'), findsNothing, reason: 'dialog closed');
 
     // Both purchases are now Groceries; the rule shows up on the rules screen.
@@ -160,8 +172,7 @@ void main() {
     await tester.tap(find.text('Withdraw cash'));
     await tester.enterText(find.widgetWithText(TextField, '0,00'), '12,50');
     await tester.enterText(find.widgetWithText(TextField, 'What was it for?'), 'Market stall');
-    await tester.tap(find.text('Save'));
-    await settleIo(tester);
+    await tapAndSave(tester, find.text('Save'));
 
     expect(find.text('Cash operation'), findsOneWidget, reason: 'dialog closed');
     await tester.enterText(find.byType(TextField).first, 'market');
@@ -181,14 +192,12 @@ void main() {
     await tester.tap(find.text('New category'));
     await tester.pumpAndSettle();
     await tester.enterText(find.widgetWithText(TextField, 'Category name'), 'Pets');
-    await tester.tap(find.text('Create'));
-    await settleIo(tester);
+    await tapAndSave(tester, find.text('Create'));
 
     // Back in the assign dialog with the new category present and selected.
     expect(find.text('Assign category'), findsOneWidget);
     expect(find.text('Pets'), findsOneWidget);
-    await tester.tap(find.text('Apply'));
-    await settleIo(tester);
+    await tapAndSave(tester, find.text('Apply'));
     expect(tester.takeException(), isNull);
   });
 
