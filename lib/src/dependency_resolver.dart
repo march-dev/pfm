@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -48,6 +50,9 @@ class DependencyResolver {
     required this.assignmentsRepo,
     required this.customCategoriesRepo,
     required this.statementPickerRepo,
+    required this.appSettingsRepo,
+    required this.errorLogRepo,
+    required this.fileManagerRepo,
   });
 
   static Future<DependencyResolver> create() async {
@@ -63,10 +68,23 @@ class DependencyResolver {
     const codec = FinanceCodec();
     const statementParser = SantanderStatementParser();
     const statementPickerRepo = StatementPickerRepo();
-    final transactionsRepo = TransactionsRepo(box: transactionsBox, codec: codec);
+    final transactionsRepo =
+        TransactionsRepo(box: transactionsBox, codec: codec);
     final rulesRepo = RulesRepo(box: settingsBox, codec: codec);
     final assignmentsRepo = AssignmentsRepo(box: settingsBox);
-    final customCategoriesRepo = CustomCategoriesRepo(box: settingsBox, codec: codec);
+    final customCategoriesRepo =
+        CustomCategoriesRepo(box: settingsBox, codec: codec);
+    const fileManagerRepo = FileManagerRepo();
+    final appSettingsRepo = AppSettingsRepo(box: settingsBox);
+
+    // One log file per launch under Application Support/logs; whether it is
+    // actually written to follows the user's persisted preference.
+    final errorLogRepo = ErrorLogRepo(
+      logsDirectory: Directory(
+        '${supportDir.path}${Platform.pathSeparator}logs',
+      ),
+    );
+    await errorLogRepo.init(enabled: appSettingsRepo.getFileLoggingEnabled());
 
     return DependencyResolver._(
       codec: codec,
@@ -76,6 +94,9 @@ class DependencyResolver {
       assignmentsRepo: assignmentsRepo,
       customCategoriesRepo: customCategoriesRepo,
       statementPickerRepo: statementPickerRepo,
+      appSettingsRepo: appSettingsRepo,
+      errorLogRepo: errorLogRepo,
+      fileManagerRepo: fileManagerRepo,
     );
   }
 
@@ -86,4 +107,7 @@ class DependencyResolver {
   final AssignmentsRepo assignmentsRepo;
   final CustomCategoriesRepo customCategoriesRepo;
   final StatementPickerRepo statementPickerRepo;
+  final AppSettingsRepo appSettingsRepo;
+  final ErrorLogRepo errorLogRepo;
+  final FileManagerRepo fileManagerRepo;
 }

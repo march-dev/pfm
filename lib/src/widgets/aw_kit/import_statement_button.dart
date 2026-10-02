@@ -14,16 +14,19 @@ class ImportStatementButton extends StatelessWidget {
     final outcome = await finance.importStatement();
     if (outcome == null) return;
 
-    SnackbarManager.show(
-      outcome.added == 0
-          ? l10n.importNothingNew(outcome.duplicates)
-          : outcome.duplicates == 0
-              ? l10n.importSuccess(outcome.added)
-              : l10n.importSuccessWithDuplicates(
-                  outcome.added,
-                  outcome.duplicates,
-                ),
-    );
+    // Orange (the default) is for problems; a clean import is a success.
+    if (outcome.added == 0) {
+      SnackbarManager.show(l10n.importNothingNew(outcome.duplicates));
+    } else {
+      SnackbarManager.showSuccess(
+        outcome.duplicates == 0
+            ? l10n.importSuccess(outcome.added)
+            : l10n.importSuccessWithDuplicates(
+                outcome.added,
+                outcome.duplicates,
+              ),
+      );
+    }
   }
 
   @override

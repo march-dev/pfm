@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../theme/app_colors.dart';
 import '../../../theme/app_sizes.dart';
 
 /// The single place a transient status message (e.g. "collection already
@@ -51,6 +52,15 @@ abstract final class SnackbarManager {
       _entry = null;
     });
   }
+
+  /// Same as [show], just always green — for a message confirming an
+  /// action actually succeeded (an import finished, ...), rather than
+  /// [show]'s own default orange warning/notice tone.
+  static void showSuccess(
+    String message, {
+    Duration duration = const Duration(seconds: 3),
+  }) =>
+      show(message, backgroundColor: AppColors.success, duration: duration);
 }
 
 class _Toast extends StatelessWidget {

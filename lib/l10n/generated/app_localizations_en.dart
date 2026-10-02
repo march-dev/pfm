@@ -378,4 +378,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String errorCategoryExists(String name) {
     return 'A category named \"$name\" already exists.';
   }
+
+  @override
+  String get navSettings => 'Settings';
+
+  @override
+  String get settingsLogsTitle => 'Error Logs';
+
+  @override
+  String get settingsLogsDescription =>
+      'Keeps a record of any problems this app runs into, saved to a file on your device. Handy to share if you ever need to report a bug. Nothing is ever sent anywhere on its own, and you can turn this off at any time.';
+
+  @override
+  String get settingsOpenLogsFolderButton => 'Open Logs Folder';
 }

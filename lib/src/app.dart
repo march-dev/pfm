@@ -44,7 +44,12 @@ class _RootScaffoldState extends State<_RootScaffold> {
     OverviewScreen(),
     TransactionsScreen(),
     CategoriesScreen(),
+    SettingsScreen(),
   ];
+
+  // Settings is pinned below the rest of the rail, so it isn't one of the
+  // `entries` below — it just takes the last screen index.
+  static const _settingsIndex = 3;
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +67,15 @@ class _RootScaffoldState extends State<_RootScaffold> {
         // The stores that need an AppLocalizations (their use cases show
         // localized failure snackbars) are built here rather than in
         // main.dart, since this is the first point a BuildContext exists.
+        Provider<AppSettingsUseCases>(
+          create: (_) => AppSettingsUseCases(deps.appSettingsRepo),
+        ),
+        Provider<ErrorLogUseCases>(
+          create: (_) => ErrorLogUseCases(deps.errorLogRepo),
+        ),
+        Provider<FileManagerUseCases>(
+          create: (_) => FileManagerUseCases(deps.fileManagerRepo),
+        ),
         Provider<FinanceState>(
           create: (_) => FinanceState(
             TransactionsUseCases(deps.transactionsRepo, l10n),
@@ -99,23 +113,52 @@ class _RootScaffoldState extends State<_RootScaffold> {
         body: Row(
           children: [
             RailContainer(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSizes.spacing12),
-                child: Column(
-                  children: [
-                    for (var i = 0; i < entries.length; i++)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: AppSizes.spacing12),
-                        child: RailItem(
-                          icon: entries[i].$1,
-                          selectedIcon: entries[i].$2,
-                          label: entries[i].$3,
-                          selected: _selectedIndex == i,
-                          onTap: () => setState(() => _selectedIndex = i),
-                        ),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSizes.spacing12,
                       ),
-                  ],
-                ),
+                      child: Column(
+                        children: [
+                          for (var i = 0; i < entries.length; i++)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: AppSizes.spacing12,
+                              ),
+                              child: RailItem(
+                                icon: entries[i].$1,
+                                selectedIcon: entries[i].$2,
+                                label: entries[i].$3,
+                                selected: _selectedIndex == i,
+                                onTap: () => setState(() => _selectedIndex = i),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Divider(
+                    height: 17,
+                    indent: AppSizes.spacing16,
+                    endIndent: AppSizes.spacing16,
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSizes.spacing12,
+                    ),
+                    child: RailItem(
+                      icon: Icons.settings_outlined,
+                      selectedIcon: Icons.settings,
+                      label: l10n.navSettings,
+                      selected: _selectedIndex == _settingsIndex,
+                      onTap: () =>
+                          setState(() => _selectedIndex = _settingsIndex),
+                    ),
+                  ),
+                ],
               ),
             ),
             Expanded(

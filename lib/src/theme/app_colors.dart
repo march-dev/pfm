@@ -24,6 +24,9 @@ abstract final class AppColors {
   /// Money out.
   static const expense = Color(0xFFFF453A);
 
+  /// A successful action's own confirmation (a statement imported, ...).
+  static const success = Colors.green;
+
   /// A destructive action, e.g. deleting a rule.
   static const destructive = Colors.red;
 

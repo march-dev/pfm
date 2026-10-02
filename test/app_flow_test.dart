@@ -41,6 +41,8 @@ void main() {
     await settleIo(tester);
   }
 
+  late DependencyResolver deps;
+
   Future<void> boot(WidgetTester tester, {bool seed = true}) async {
     tester.view.physicalSize = const Size(1440, 900);
     tester.view.devicePixelRatio = 1;
@@ -57,7 +59,7 @@ void main() {
     });
 
     await tester.runAsync(() async {
-      final deps = await DependencyResolver.create();
+      deps = await DependencyResolver.create();
       if (seed) {
         final parsed = const SantanderStatementParser().parse(
           File('test/data/TransactionExcelFile.xlsx').readAsBytesSync(),
@@ -230,6 +232,33 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Settings (pinned below the rail) holds the Error Logs card',
+      (tester) async {
+    await boot(tester);
+
+    // Settings sits under the divider, below the main entries.
+    final settingsItem = tester.getRect(find.text('Settings'));
+    final categoriesItem = tester.getRect(find.text('Categories').first);
+    expect(settingsItem.top, greaterThan(categoriesItem.bottom + 100),
+        reason: 'pinned to the bottom, not stacked with the others');
+
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    expect(find.text('Error Logs'), findsOneWidget);
+    expect(deps.appSettingsRepo.getFileLoggingEnabled(), isTrue);
+
+    // Real log file exists for this launch under <support dir>/logs.
+    final logsDir = deps.errorLogRepo.logsDirectory;
+    expect(logsDir.path, endsWith('logs'));
+    expect(logsDir.existsSync(), isTrue);
+
+    // The preference persists through Hive.
+    await tapAndSave(tester, find.byType(Switch));
+    expect(deps.appSettingsRepo.getFileLoggingEnabled(), isFalse);
+    expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('assign a category to every transaction matching a pattern',
       (tester) async {
     await boot(tester);
@@ -332,7 +361,7 @@ void main() {
     tester.view.physicalSize = const Size(1000, 640);
     await tester.pumpAndSettle();
 
-    for (final tab in ['Overview', 'Transactions', 'Categories']) {
+    for (final tab in ['Overview', 'Transactions', 'Categories', 'Settings']) {
       await tester.tap(find.text(tab).first);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull, reason: '$tab @ 1000x640');

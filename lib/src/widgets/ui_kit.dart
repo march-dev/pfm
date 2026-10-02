@@ -6,6 +6,7 @@ export 'ui_kit/animated_indexed_stack.dart';
 export 'ui_kit/badges/color_dot.dart';
 export 'ui_kit/badges/pill_badge.dart';
 export 'ui_kit/buttons/app_segmented_button.dart';
+export 'ui_kit/buttons/app_switch.dart';
 export 'ui_kit/buttons/circle_icon_button.dart';
 export 'ui_kit/buttons/primary_button.dart';
 export 'ui_kit/buttons/refresh_icon_button.dart';

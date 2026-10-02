@@ -64,32 +64,39 @@ class CategorizationUseCases {
     String value = '',
     Set<String> coveredIds = const {},
   }) async {
+    // Validated before touching storage: it needs no I/O, and the user
+    // should hear "that pattern isn't valid" even if storage is the thing
+    // that's broken.
+    final ruleKind = switch (scope) {
+      AssignmentScope.single => null,
+      AssignmentScope.exactName => RuleKind.exactName,
+      AssignmentScope.pattern => RuleKind.pattern,
+    };
+    if (ruleKind != null && !_matcher.isValid(ruleKind, value)) {
+      SnackbarManager.show(_l10n.errorInvalidPattern);
+      return null;
+    }
+
     try {
       final assignments = _assignments.getAll();
-      switch (scope) {
-        case AssignmentScope.single:
-          assignments[transactionId] = categoryId;
-        case AssignmentScope.exactName || AssignmentScope.pattern:
-          final kind = scope == AssignmentScope.exactName
-              ? RuleKind.exactName
-              : RuleKind.pattern;
-          if (!_matcher.isValid(kind, value)) {
-            SnackbarManager.show(_l10n.errorInvalidPattern);
-            return null;
-          }
-          final rules = _rules.getAll()
-            ..removeWhere((r) => r.kind == kind && _sameValue(r.value, value));
-          rules.add(
-            CategoryRule(
-              id: 'rule_${DateTime.now().microsecondsSinceEpoch}',
-              kind: kind,
-              value: value.trim(),
-              categoryId: categoryId,
-              createdAt: DateTime.now(),
-            ),
+      if (ruleKind == null) {
+        assignments[transactionId] = categoryId;
+      } else {
+        final rules = _rules.getAll()
+          ..removeWhere(
+            (r) => r.kind == ruleKind && _sameValue(r.value, value),
           );
-          assignments.removeWhere((txId, _) => coveredIds.contains(txId));
-          await _rules.saveAll(rules);
+        rules.add(
+          CategoryRule(
+            id: 'rule_${DateTime.now().microsecondsSinceEpoch}',
+            kind: ruleKind,
+            value: value.trim(),
+            categoryId: categoryId,
+            createdAt: DateTime.now(),
+          ),
+        );
+        assignments.removeWhere((txId, _) => coveredIds.contains(txId));
+        await _rules.saveAll(rules);
       }
       await _assignments.saveAll(assignments);
       return _snapshot();

@@ -717,6 +717,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A category named \"{name}\" already exists.'**
   String errorCategoryExists(String name);
+
+  /// No description provided for @navSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
+  /// No description provided for @settingsLogsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Error Logs'**
+  String get settingsLogsTitle;
+
+  /// No description provided for @settingsLogsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps a record of any problems this app runs into, saved to a file on your device. Handy to share if you ever need to report a bug. Nothing is ever sent anywhere on its own, and you can turn this off at any time.'**
+  String get settingsLogsDescription;
+
+  /// No description provided for @settingsOpenLogsFolderButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Logs Folder'**
+  String get settingsOpenLogsFolderButton;
 }
 
 class _AppLocalizationsDelegate
